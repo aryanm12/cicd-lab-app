@@ -1,5 +1,5 @@
 pipeline {
-    agent none  // No global agent — each stage picks its own
+    agent none
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -15,7 +15,7 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            agent any  // Runs on Jenkins master
+            agent any
             steps {
                 echo "=========================================="
                 echo " Building: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
@@ -27,9 +27,7 @@ pipeline {
 
         stage('Install & Test') {
             agent {
-                docker {
-                    image 'python:3.11-slim'
-                }
+                docker { image 'python:3.11-slim' }
             }
             steps {
                 unstash 'source-code'
@@ -41,13 +39,11 @@ pipeline {
         }
 
         stage('Quality Checks') {
-            agent {
-                docker {
-                    image 'python:3.11-slim'
-                }
-            }
             parallel {
                 stage('Unit Tests') {
+                    agent {
+                        docker { image 'python:3.11-slim' }
+                    }
                     steps {
                         unstash 'source-code'
                         sh 'pip install --quiet -r requirements.txt'
@@ -60,6 +56,9 @@ pipeline {
                     }
                 }
                 stage('Syntax Check') {
+                    agent {
+                        docker { image 'python:3.11-slim' }
+                    }
                     steps {
                         unstash 'source-code'
                         sh 'pip install --quiet -r requirements.txt'
@@ -70,6 +69,9 @@ pipeline {
                     }
                 }
                 stage('Dependency Audit') {
+                    agent {
+                        docker { image 'python:3.11-slim' }
+                    }
                     steps {
                         unstash 'source-code'
                         sh '''
@@ -83,7 +85,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            agent any  // Runs on master where Docker CLI is available
+            agent any
             steps {
                 unstash 'source-code'
                 script {
