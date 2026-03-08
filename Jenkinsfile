@@ -26,7 +26,6 @@ pipeline {
                 echo " Branch:   ${env.GIT_BRANCH}"
                 echo " Commit:   ${env.GIT_COMMIT?.take(8)}"
                 echo "=========================================="
-                sh 'git log --oneline -5'
             }
         }
 
